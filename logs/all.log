@@ -1,0 +1,4 @@
+time="2024-02-02T23:00:34+06:00" level=fatal msg="unable to connect to the storage failed to connect to mongoDB due to error: parse \"mongodb+srv://<arupmamushev2>:<8uCVGp77VqfcWE63>@cluster0.rmlnl4n.mongodb.net/?retryWrites=true&w=majority\": net/url: invalid userinfo" func="main.main()" file="app.go:26"
+time="2024-02-02T23:06:48+06:00" level=fatal msg="unable to connect to the storage parse \"mongodb+srv://<arupmamushev2>:<8uCVGp77VqfcWE63>@cluster0.rmlnl4n.mongodb.net/?retryWrites=true&w=majority\": net/url: invalid userinfo" func="main.main()" file="app.go:27"
+time="2024-02-02T23:08:30+06:00" level=fatal msg="unable to connect to the storage parse \"mongodb+srv://<arupmamushev2>:<8uCVGp77VqfcWE63>@cluster0.rmlnl4n.mongodb.net/?retryWrites=true&w=majority\": net/url: invalid userinfo" func="main.main()" file="app.go:28"
+time="2024-02-03T02:17:20+06:00" level=fatal msg="listen tcp: address 1010: missing port in address" func="main.main()" file="app.go:41"

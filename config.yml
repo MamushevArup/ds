@@ -1,0 +1,6 @@
+mongo:
+  database: test
+  collection:
+    - commands
+http:
+  port: 1010
