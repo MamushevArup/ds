@@ -6,10 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type InsertCommand interface {
-	Insert(ctx context.Context, command, description string) error
-}
-
 type Gamer interface {
 	InsertRandom(ctx context.Context, id string, number int) error
 }
@@ -23,17 +19,15 @@ type Guess interface {
 }
 
 type Repo struct {
-	Insert InsertCommand
-	Game   Gamer
-	AddU   InsertUser
-	Guess  Guess
+	Game  Gamer
+	AddU  InsertUser
+	Guess Guess
 }
 
 func NewRepo(lg *logger.Logger, db *mongo.Database) *Repo {
 	return &Repo{
-		Insert: NewCommand(lg, db),
-		AddU:   NewUser(lg, db),
-		Game:   NewGamer(lg, db),
-		Guess:  NewGus(lg, db),
+		AddU:  NewUser(lg, db),
+		Game:  NewGamer(lg, db),
+		Guess: NewGus(lg, db),
 	}
 }

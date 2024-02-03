@@ -65,28 +65,46 @@ func (b *Bot) startBotMessage(s *discordgo.Session, m *discordgo.MessageCreate) 
 				return
 			}
 		case "guess":
-			gs := strings.Fields(command)
-			if len(gs) < 2 {
-				return
-			}
-			number, err := parseInt(gs[1])
+			err := guess(command, split[0], s, m)
 			if err != nil {
+				_, err = s.ChannelMessageSend(m.ChannelID, somethingWrong)
 				return
 			}
-			// http://host/guess/:id/:number
-			url := fmt.Sprintf("%s%s/%s/%d", os.Getenv("SERVER"), split[0], m.Author.ID, number)
+		case "help":
+			url := fmt.Sprintf("%s%s", os.Getenv("SERVER"), split[0])
 			resp, err := http.Get(url)
 			if err != nil {
-				fmt.Println("error with sending request ", err)
+				log.Println(err)
 				return
 			}
 			defer resp.Body.Close()
-			err = marshalling(resp, s, m)
+			byteValue, err := io.ReadAll(resp.Body)
 			if err != nil {
+				log.Println(err)
+			}
+			var hm map[string]string
+			err = json.Unmarshal(byteValue, &hm)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			res := formatJSON(hm)
+			_, err = s.ChannelMessageSend(m.ChannelID, res)
+			if err != nil {
+				log.Printf("message is not sent due to %v", err)
 				return
 			}
 		}
 	}
+}
+func formatJSON(data map[string]string) string {
+	var formattedStrings []string
+
+	for key, value := range data {
+		formattedStrings = append(formattedStrings, fmt.Sprintf("%s : %v", key, value))
+	}
+
+	return strings.Join(formattedStrings, "\n")
 }
 
 // this function remove the firs character which means the command ex !, /

@@ -43,6 +43,27 @@ func handleGame(s *discordgo.Session, m *discordgo.MessageCreate, command, split
 	return marshalling(resp, s, m)
 }
 
+func guess(command, split string, s *discordgo.Session, m *discordgo.MessageCreate) error {
+	gs := strings.Fields(command)
+	number, err := parseInt(gs[1])
+	if err != nil {
+		return err
+	}
+	// http://host/guess/:id/:number
+	url := fmt.Sprintf("%s%s/%s/%d", os.Getenv("SERVER"), split, m.Author.ID, number)
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("error with sending request ", err)
+		return err
+	}
+	defer resp.Body.Close()
+	err = marshalling(resp, s, m)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func parseGameCommand(command string) (int, int, error) {
 	// Split the command by spaces
 	parts := strings.Fields(command)
