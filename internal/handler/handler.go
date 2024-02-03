@@ -1,12 +1,9 @@
 package handler
 
 import (
-	"encoding/json"
 	"github.com/MamushevArup/discord-bot/internal/service"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
-	"os"
 )
 
 type Handler interface {
@@ -29,25 +26,24 @@ func (h *handler) InitRoutes() *gin.Engine {
 	router.POST("/game", h.game)
 	router.GET("/guess/:id/:number", h.guess)
 	router.GET("/help", h.help)
+	router.POST("/poll/:id", h.poll)
 	return router
 }
 
-func (h *handler) help(c *gin.Context) {
-	open, err := os.Open("./helper.json")
-	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+func (h *handler) poll(c *gin.Context) {
+	id := c.Param("id")
+	type poll struct {
+		Question string         `json:"question"`
+		Options  map[int]string `json:"options"`
+	}
+	var p poll
+	if err := c.BindJSON(&p); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
-	all, err := io.ReadAll(open)
+	err := h.srv.Poll.CreatePoll(id, p.Question, p.Options)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
 	}
-	var hm map[string]interface{}
-	err = json.Unmarshal(all, &hm)
-	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	c.JSON(200, hm)
+	c.JSON(201, gin.H{"message": "Poll created to vote use !vote <question> <option> command"})
 }

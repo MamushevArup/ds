@@ -17,10 +17,15 @@ type Guess interface {
 	MatchNumbers(ctx context.Context, id, number string) (string, error)
 }
 
+type Poll interface {
+	CreatePoll(id, question string, options map[int]string) error
+}
+
 type Service struct {
 	Game  Gamer
 	Hello Hello
 	Guess Guess
+	Poll  Poll
 }
 
 func NewService(repos *repo.Repo) *Service {
@@ -28,5 +33,6 @@ func NewService(repos *repo.Repo) *Service {
 		Game:  NewGame(repos.Game),
 		Hello: NewUser(repos.AddU),
 		Guess: NewGuess(repos.Guess),
+		Poll:  NewPoll(),
 	}
 }

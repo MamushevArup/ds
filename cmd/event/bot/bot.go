@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -71,40 +70,28 @@ func (b *Bot) startBotMessage(s *discordgo.Session, m *discordgo.MessageCreate) 
 				return
 			}
 		case "help":
-			url := fmt.Sprintf("%s%s", os.Getenv("SERVER"), split[0])
-			resp, err := http.Get(url)
+			err := handleHelp(split[0], s, m)
 			if err != nil {
-				log.Println(err)
+				_, err = s.ChannelMessageSend(m.ChannelID, somethingWrong)
 				return
 			}
-			defer resp.Body.Close()
-			byteValue, err := io.ReadAll(resp.Body)
+		case "poll":
+			err := handlePoll(command, split[0], s, m)
 			if err != nil {
-				log.Println(err)
-			}
-			var hm map[string]string
-			err = json.Unmarshal(byteValue, &hm)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			res := formatJSON(hm)
-			_, err = s.ChannelMessageSend(m.ChannelID, res)
-			if err != nil {
-				log.Printf("message is not sent due to %v", err)
+				_, err = s.ChannelMessageSend(m.ChannelID, somethingWrong)
 				return
 			}
 		}
 	}
 }
-func formatJSON(data map[string]string) string {
-	var formattedStrings []string
 
-	for key, value := range data {
-		formattedStrings = append(formattedStrings, fmt.Sprintf("%s : %v", key, value))
+func findOptionIndex(parts []string) int {
+	for i, part := range parts {
+		if strings.HasPrefix(part, "-") && i+1 < len(parts) {
+			return i
+		}
 	}
-
-	return strings.Join(formattedStrings, "\n")
+	return -1
 }
 
 // this function remove the firs character which means the command ex !, /
