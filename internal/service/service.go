@@ -18,7 +18,8 @@ type Guess interface {
 }
 
 type Poll interface {
-	CreatePoll(id, question string, options map[int]string) error
+	CreatePoll(id, question string, options []string) error
+	Vote(id, question, option string) (int, error)
 }
 
 type Service struct {

@@ -1,0 +1,24 @@
+# server dockerfile
+FROM golang:1.21 as builder
+
+WORKDIR /server
+
+COPY . .
+COPY /config.yml /config.yml
+COPY /helper.json /helper.json
+
+RUN go mod download
+
+RUN CGO_ENABLED=0 go build -o /discord cmd/main/app.go
+
+FROM alpine:latest
+
+WORKDIR /server
+
+EXPOSE 1111
+
+COPY --from=builder /discord /server/discord
+COPY --from=builder /config.yml /server/config.yml
+COPY --from=builder /helper.json /server/helper.json
+
+ENTRYPOINT ["/server/discord"]

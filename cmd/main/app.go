@@ -8,27 +8,19 @@ import (
 	"github.com/MamushevArup/discord-bot/internal/service"
 	"github.com/MamushevArup/discord-bot/pkg/logger"
 	"github.com/MamushevArup/discord-bot/pkg/mongodb"
-	"github.com/joho/godotenv"
 	"net/http"
-	"os"
 )
 
 func main() {
 	// Init logger
 	lg := logger.NewLogger()
-	// Init environment reader
-	if err := godotenv.Load(); err != nil {
-		lg.Fatalf("cannot load env %v", err)
-	}
 	// Init config use clean env library
 	cfg, err := config.NewConfig()
 	if err != nil {
 		lg.Fatalf("error with reading config %e", err)
 	}
-
-	mgUrl := os.Getenv("MONGO_URL")
 	// Init the package universal mongo client creator
-	mg, err := mongodb.NewClient(context.Background(), mgUrl, cfg.Mongo.Database)
+	mg, err := mongodb.NewClient(context.Background(), cfg.Mongo.URL, cfg.Mongo.Database)
 	if err != nil {
 		lg.Fatalf("unable to connect to the storage %v", err)
 	}

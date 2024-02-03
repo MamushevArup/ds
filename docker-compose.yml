@@ -1,0 +1,37 @@
+version: '3.5'
+
+services:
+  mongodb:
+    container_name: mongod
+    image: mongo
+    command: ["--noauth"]
+    networks:
+      - custom
+    ports:
+      - "27017:27017"
+
+  ds-server:
+    container_name: ds-server
+    build:
+      dockerfile: Dockerfile/dockerfile
+      context: .
+    networks:
+      - custom
+    ports:
+      - "1111:1111"
+    depends_on:
+      - mongodb
+
+  bot:
+    container_name: bot
+    build:
+      dockerfile: cmd/event/dockerfile/Dockerfile
+      context: .
+    networks:
+      - custom
+    depends_on:
+      - ds-server
+    restart: always
+
+networks:
+  custom:

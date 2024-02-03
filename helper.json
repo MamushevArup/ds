@@ -3,5 +3,7 @@
   "hello" : "command return hello message.",
   "game <low> <high>" : "start a guess number game you provide a boundary where bot generate number and you should find it.\nExample !game 10 40",
   "guess <number>" : "guess the number if you right game ended and you win.\nExample !guess 34",
-  "help" : "shows you all commands available to you"
+  "help" : "shows you all commands available to you",
+  "vote -q <question> -o <option>" : "This command provide you a vote ability",
+  "poll -q <question> -1 <option> -2 <option> ...." : "helps you create a poll with options"
 }

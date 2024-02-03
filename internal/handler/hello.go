@@ -26,7 +26,7 @@ func (h *handler) hello(c *gin.Context) {
 }
 
 func (h *handler) help(c *gin.Context) {
-	open, err := os.Open("./helper.json")
+	open, err := os.Open("helper.json")
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

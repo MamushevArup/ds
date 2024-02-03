@@ -81,17 +81,15 @@ func (b *Bot) startBotMessage(s *discordgo.Session, m *discordgo.MessageCreate) 
 				_, err = s.ChannelMessageSend(m.ChannelID, somethingWrong)
 				return
 			}
+		case "vote":
+			// expected behavior here ex -> !vote -q Who is me -o Ron
+			err := handleVote(command, split[0], s, m)
+			if err != nil {
+				_, err = s.ChannelMessageSend(m.ChannelID, somethingWrong)
+				return
+			}
 		}
 	}
-}
-
-func findOptionIndex(parts []string) int {
-	for i, part := range parts {
-		if strings.HasPrefix(part, "-") && i+1 < len(parts) {
-			return i
-		}
-	}
-	return -1
 }
 
 // this function remove the firs character which means the command ex !, /

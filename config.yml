@@ -1,6 +1,7 @@
 mongo:
   database: test
+  url: mongodb://mongod:27017/test
   collection:
     user: user
 http:
-  port: 1010
+  port: 1111

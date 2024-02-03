@@ -3,7 +3,9 @@ package handler
 import (
 	"github.com/MamushevArup/discord-bot/internal/service"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+	"strconv"
 )
 
 type Handler interface {
@@ -27,23 +29,32 @@ func (h *handler) InitRoutes() *gin.Engine {
 	router.GET("/guess/:id/:number", h.guess)
 	router.GET("/help", h.help)
 	router.POST("/poll/:id", h.poll)
+	router.POST("/vote/:id", h.vote)
 	return router
 }
 
-func (h *handler) poll(c *gin.Context) {
+func (h *handler) vote(c *gin.Context) {
 	id := c.Param("id")
-	type poll struct {
-		Question string         `json:"question"`
-		Options  map[int]string `json:"options"`
+	type vote struct {
+		Question string `json:"question"`
+		Option   string `json:"option"`
 	}
-	var p poll
-	if err := c.BindJSON(&p); err != nil {
+	if id == "" {
+		newErrorResponse(c, http.StatusBadRequest, "no id provided")
+		return
+	}
+	var v vote
+	if err := c.BindJSON(&v); err != nil || v.Option == "" || v.Question == "" {
+		log.Println(err)
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
-	err := h.srv.Poll.CreatePoll(id, p.Question, p.Options)
+	counter, err := h.srv.Poll.Vote(id, v.Question, v.Option)
 	if err != nil {
+		log.Println(err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
-	c.JSON(201, gin.H{"message": "Poll created to vote use !vote <question> <option> command"})
+	cnt := strconv.Itoa(counter)
+	c.JSON(201, gin.H{"message": "your vote counted for this vote counter " + cnt})
 }
