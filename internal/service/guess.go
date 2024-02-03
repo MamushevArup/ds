@@ -15,6 +15,7 @@ func NewGuess(gus repo.Guess) *Gus {
 }
 
 func (g *Gus) MatchNumbers(ctx context.Context, id, number string) (string, error) {
+	// get initial number from storage
 	try, err := g.gus.Try(ctx, id)
 	if err != nil {
 		return "", err

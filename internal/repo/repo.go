@@ -18,6 +18,7 @@ type Guess interface {
 	Try(ctx context.Context, id string) (int, error)
 }
 
+// Repo is struct of interfaces for easy management
 type Repo struct {
 	Game  Gamer
 	AddU  InsertUser

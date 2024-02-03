@@ -9,6 +9,9 @@ import (
 	"github.com/MamushevArup/discord-bot/pkg/logger"
 	"github.com/MamushevArup/discord-bot/pkg/mongodb"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -27,10 +30,17 @@ func main() {
 
 	// Init storage | repo layer
 	storage := repo.NewRepo(lg, mg)
+	// Init service
 	srv := service.NewService(storage)
+	// Init handler
 	hdl := handler.NewBot(srv)
-
-	if err = http.ListenAndServe(":"+cfg.HTTP.Port, hdl.InitRoutes()); err != nil {
-		return
-	}
+	// start listen connection
+	go func() {
+		if err = http.ListenAndServe(":"+cfg.HTTP.Port, hdl.InitRoutes()); err != nil {
+			return
+		}
+	}()
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
 }

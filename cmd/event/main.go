@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	// load environmental variables using 3 party
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(err.Error())
 	}
@@ -20,7 +21,10 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	// start new bot instance
 	b := bot.NewBot(session)
+
+	// implement message handling
 	err = b.StartBot()
 	if err != nil {
 		return

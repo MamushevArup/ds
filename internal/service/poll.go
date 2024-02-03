@@ -8,11 +8,14 @@ import (
 type P struct {
 	// in memory storage where key is question and value is option
 
-	poll      map[string][]string
+	// poll key -> question, value : options
+	poll map[string][]string
+	// createdBy key -> question value : author_id
 	createdBy map[string]string
 	// question : { option : [ user_id ] }
 	voted map[string]map[string][]string
-	mu    sync.Mutex
+	// for concurrent safe access to the map
+	mu sync.Mutex
 }
 
 func NewPoll() *P {
@@ -38,6 +41,7 @@ func (p *P) Vote(id, question, option string) (int, error) {
 	if p.createdBy[question] == "" {
 		return 0, errors.New("question doesn't exist")
 	}
+	// check for option exist
 	var checker bool
 	for _, i2 := range p.poll[question] {
 		if i2 == option {
@@ -47,11 +51,13 @@ func (p *P) Vote(id, question, option string) (int, error) {
 	if !checker {
 		return 0, errors.New("option doesn't exist")
 	}
-	if _, ok := p.voted[id][question]; !ok {
+	// check for user_id > 0 and init the map for escape panic
+	if _, ok := p.voted[question][option]; !ok {
 		// If not, initialize a map for the question
 		p.voted[question] = make(map[string][]string)
 	}
 	p.voted[question][option] = append(p.voted[question][option], id)
 	p.mu.Unlock()
+	// how many people voted for this option in particular question
 	return len(p.voted[question][option]), nil
 }

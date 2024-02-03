@@ -4,6 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// error response block to reuse
+
 type errorResponse struct {
 	Message string `json:"message"`
 }

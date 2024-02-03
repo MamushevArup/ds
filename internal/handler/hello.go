@@ -26,16 +26,19 @@ func (h *handler) hello(c *gin.Context) {
 }
 
 func (h *handler) help(c *gin.Context) {
+	// open json command explainer
 	open, err := os.Open("helper.json")
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	//read command explainer
 	all, err := io.ReadAll(open)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	// unmarshal to the map
 	var hm map[string]interface{}
 	err = json.Unmarshal(all, &hm)
 	if err != nil {

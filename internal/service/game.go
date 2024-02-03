@@ -24,6 +24,7 @@ func (g *Game) GenerateNumber(ctx context.Context, id string, up, low int) (int,
 	if id == "" {
 		return 0, errors.New("id is empty")
 	}
+	// randomize using built-in packages
 	seed, err := rand.Int(rand.Reader, big.NewInt(1<<63-1))
 	if err != nil {
 		return 0, fmt.Errorf("error generating random seed: %v", err)
@@ -39,6 +40,7 @@ func (g *Game) GenerateNumber(ctx context.Context, id string, up, low int) (int,
 
 	// Generate and return a random number within the specified range [low, up)
 	random := r.Intn(up-low) + low
+	// insert number to the storage
 	err = g.game.InsertRandom(ctx, id, random)
 	if err != nil {
 		return 0, err

@@ -5,6 +5,8 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
+// This package parse value from config to struct for now it is only .yml
+
 type Config struct {
 	Mongo `yaml:"mongo"`
 	HTTP  `yaml:"http"`
