@@ -11,8 +11,11 @@ type Config struct {
 }
 
 type Mongo struct {
-	Database   string   `yaml:"database"`
-	Collection []string `yaml:"collection"`
+	Database   string `yaml:"database"`
+	Collection `yaml:"collection"`
+}
+type Collection struct {
+	User string `yaml:"user"`
 }
 
 type HTTP struct {

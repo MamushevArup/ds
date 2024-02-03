@@ -23,5 +23,6 @@ func (h *handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
 	router.GET("/hello/:id", h.hello)
 	router.POST("/game", h.game)
+	router.GET("/guess/:id/:number", h.guess)
 	return router
 }

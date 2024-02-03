@@ -2,15 +2,19 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 // responsible for defining range in the game
 type game struct {
-	Upper int `json:"upper"`
-	Lower int `json:"lower"`
+	UserID string `json:"user_id"`
+	Upper  int    `json:"upper"`
+	Lower  int    `json:"lower"`
 }
+
+var find = "number generated with command !guess <number> try to find out it"
 
 func (h *handler) game(c *gin.Context) {
 	// user should guess and server should generate
@@ -24,11 +28,12 @@ func (h *handler) game(c *gin.Context) {
 		return
 	}
 	// pass the lower and upper bound
-	number, err := h.srv.Gamer.GenerateNumber(context.TODO(), g.Upper, g.Lower)
+
+	number, err := h.srv.Game.GenerateNumber(context.TODO(), g.UserID, g.Upper, g.Lower)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	c.JSON(201, gin.H{"message": number})
+	fmt.Println(number)
+	c.JSON(201, gin.H{"message": find})
 }

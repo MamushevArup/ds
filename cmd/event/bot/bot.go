@@ -11,25 +11,26 @@ import (
 	"strings"
 )
 
-var somethingWrong = "Something went wrong try again later"
+var (
+	somethingWrong = "Something went wrong try again later"
+)
 
 type Bot struct {
 	session *discordgo.Session
-	// this field handle last command typed
-	last []string
 }
 
 func NewBot(session *discordgo.Session) *Bot {
 	return &Bot{
 		session: session,
-		last:    make([]string, 0),
 	}
 }
 
+// message responsible only for send message from server
 type message struct {
 	Message string `json:"message"`
 }
 
+// StartBot main entry point for `frontend of the bot`
 func (b *Bot) StartBot() error {
 	b.session.AddHandler(b.startBotMessage)
 	err := b.session.Open()
@@ -40,6 +41,7 @@ func (b *Bot) StartBot() error {
 	return nil
 }
 
+// startBotMessage encapsulate the logic for command handling
 func (b *Bot) startBotMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -47,33 +49,55 @@ func (b *Bot) startBotMessage(s *discordgo.Session, m *discordgo.MessageCreate) 
 	// Check if the message starts with the command prefix
 	if strings.HasPrefix(m.Content, "!") {
 		command := removeSlash(m.Content)
+		split := strings.Split(command, " ")
 		// Check the command and respond accordingly
-		switch command {
+		switch split[0] {
 		case "hello":
-			err := handleHello(s, m, command)
+			err := handleHello(s, m, split[0])
 			if err != nil {
 				_, err = s.ChannelMessageSend(m.ChannelID, somethingWrong)
 				return
 			}
 		case "game":
-
+			err := handleGame(s, m, command, split[0])
+			if err != nil {
+				_, err = s.ChannelMessageSend(m.ChannelID, somethingWrong)
+				return
+			}
+		case "guess":
+			gs := strings.Fields(command)
+			if len(gs) < 2 {
+				return
+			}
+			number, err := parseInt(gs[1])
+			if err != nil {
+				return
+			}
+			// http://host/guess/:id/:number
+			url := fmt.Sprintf("%s%s/%s/%d", os.Getenv("SERVER"), split[0], m.Author.ID, number)
+			resp, err := http.Get(url)
+			if err != nil {
+				fmt.Println("error with sending request ", err)
+				return
+			}
+			defer resp.Body.Close()
+			err = marshalling(resp, s, m)
+			if err != nil {
+				return
+			}
 		}
 	}
-	b.last = append(b.last, m.Content)
-	fmt.Println(b.last)
 }
 
-func handleHello(s *discordgo.Session, m *discordgo.MessageCreate, command string) error {
-	// the request should look like this host/hello/id
-	endpoint := fmt.Sprintf("%s%s/%s", os.Getenv("SERVER"), command, m.Author.ID)
-	response, err := http.Get(endpoint)
-	if err != nil {
-		fmt.Println("Error sending HTTP request:", err)
-		return err
-	}
-	defer response.Body.Close()
+// this function remove the firs character which means the command ex !, /
+func removeSlash(command string) string {
+	// ex !game -> game
+	// !game 10 40 -> game 10 40
+	return command[1:]
+}
 
-	// Read the response body
+// utility function which is repeatable almost for all commands
+func marshalling(response *http.Response, s *discordgo.Session, m *discordgo.MessageCreate) error {
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
@@ -95,9 +119,4 @@ func handleHello(s *discordgo.Session, m *discordgo.MessageCreate, command strin
 		return err
 	}
 	return nil
-}
-
-// this function remove the firs character which means the command ex !, /
-func removeSlash(command string) string {
-	return command[1:]
 }

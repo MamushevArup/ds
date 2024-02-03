@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"github.com/MamushevArup/discord-bot/internal/repo"
 	"math/big"
@@ -19,7 +20,10 @@ func NewGame(game repo.Gamer) *Game {
 	}
 }
 
-func (g *Game) GenerateNumber(ctx context.Context, up, low int) (int, error) {
+func (g *Game) GenerateNumber(ctx context.Context, id string, up, low int) (int, error) {
+	if id == "" {
+		return 0, errors.New("id is empty")
+	}
 	seed, err := rand.Int(rand.Reader, big.NewInt(1<<63-1))
 	if err != nil {
 		return 0, fmt.Errorf("error generating random seed: %v", err)
@@ -34,5 +38,10 @@ func (g *Game) GenerateNumber(ctx context.Context, up, low int) (int, error) {
 	}
 
 	// Generate and return a random number within the specified range [low, up)
-	return r.Intn(up-low) + low, nil
+	random := r.Intn(up-low) + low
+	err = g.game.InsertRandom(ctx, id, random)
+	if err != nil {
+		return 0, err
+	}
+	return random, nil
 }

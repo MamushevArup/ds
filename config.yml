@@ -1,6 +1,6 @@
 mongo:
   database: test
   collection:
-    - commands
+    user: user
 http:
   port: 1010
